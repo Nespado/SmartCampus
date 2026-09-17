@@ -44,6 +44,27 @@ class Client:
         print("   DEMONSTRATION FACADE / GROUPE 4 COMPLÉTÉE")
         print("=" * 60)
 
+        # 4. Importation des données via la Façade
+        print("\n[4] Importation des données via SmartCampusFacade...")
+
+        unified_data = self.facade.import_data()
+
+        print(f"    Données retournées : {unified_data}")
+
+        # 5. Récupération des données via la Façade
+        print("\n[5] Récupération des données via SmartCampusFacade...")
+
+        data = self.facade.retrieve_data()
+
+        print(f"    Données récupérées : {data}")
+
+        # 6. Génération d'un rapport via la Façade
+        print("\n[6] Génération d'un rapport via SmartCampusFacade...")
+
+        report = self.facade.generate_report()
+
+        print(f"    Rapport généré : {report}")
+
 
 def main():
     facade = SmartCampusFacade()

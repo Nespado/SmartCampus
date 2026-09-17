@@ -92,3 +92,123 @@ class ReservationServiceStub(ReservationService):
 
     def redo_last_action(self) -> None:
         print("[ReservationService (Groupe 4)] Rétablissement de la dernière action (Redo).")
+
+
+# ============================================================
+# DATA MANAGEMENT
+# ============================================================
+
+class UnifiedData:
+    """Représente les données unifiées importées du système."""
+
+    def __init__(self, data: Any = None):
+        self.data = data if data is not None else []
+
+    def __repr__(self) -> str:
+        return f"UnifiedData({self.data})"
+
+
+class LegacyFile:
+    """Représente un fichier provenant d'un ancien système."""
+
+    def __init__(self, filename: str, content: Any = None):
+        self.filename = filename
+        self.content = content
+
+    def __repr__(self) -> str:
+        return f"LegacyFile({self.filename})"
+
+
+class Report:
+    """Représente un rapport généré à partir des données."""
+
+    def __init__(self, title: str, content: Any = None):
+        self.title = title
+        self.content = content
+
+    def __repr__(self) -> str:
+        return f"Report(title={self.title})"
+
+
+class DataManagementService(ABC):
+    """
+    Interface du service de gestion des données.
+
+    Méthodes conformes au modèle UML :
+    - importData() -> UnifiedData
+    - retrieveData() -> UnifiedData
+    - generateReport() -> Report
+    """
+
+    @abstractmethod
+    def import_data(self) -> UnifiedData:
+        pass
+
+    @abstractmethod
+    def retrieve_data(self) -> UnifiedData:
+        pass
+
+    @abstractmethod
+    def generate_report(self) -> Report:
+        pass
+
+
+class DataManagementServiceStub(DataManagementService):
+    """Stub simulant le DataManagementService."""
+
+    def __init__(self):
+        self.files = []
+        self.reports = []
+        self.unified_data = UnifiedData()
+
+    def import_data(self) -> UnifiedData:
+        """
+        Simule l'importation de fichiers Legacy
+        et leur transformation en données unifiées.
+        """
+
+        print("[DataManagementService] Importation des données...")
+
+        self.files = [
+            LegacyFile("students.csv"),
+            LegacyFile("rooms.csv"),
+            LegacyFile("courses.csv"),
+        ]
+
+        self.unified_data = UnifiedData({
+            "students": 1200,
+            "rooms": 45,
+            "courses": 80,
+        })
+
+        print(
+            f"[DataManagementService] "
+            f"{len(self.files)} fichiers importés."
+        )
+
+        return self.unified_data
+
+    def retrieve_data(self) -> UnifiedData:
+        """Simule la récupération des données unifiées."""
+
+        print("[DataManagementService] Récupération des données...")
+
+        return self.unified_data
+
+    def generate_report(self) -> Report:
+        """Simule la génération d'un rapport."""
+
+        print("[DataManagementService] Génération du rapport...")
+
+        report = Report(
+            title="Rapport SmartCampus",
+            content={
+                "students": self.unified_data.data.get("students", 0),
+                "rooms": self.unified_data.data.get("rooms", 0),
+                "courses": self.unified_data.data.get("courses", 0),
+            },
+        )
+
+        self.reports.append(report)
+
+        return report
