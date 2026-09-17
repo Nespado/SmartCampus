@@ -31,8 +31,13 @@ class Client:
         )
         print(f"    Résultat retourné par la Façade : {reservation}")
 
-        # 2. Annulation de la réservation via la Façade
-        print("\n[2] Demande d'annulation de la réservation via SmartCampusFacade...")
+        # 2. Undo / Redo via la Façade
+        print("\n[2] Test Undo / Redo via SmartCampusFacade...")
+        self.facade.undo_last_action()
+        self.facade.redo_last_action()
+
+        # 3. Annulation de la réservation via la Façade
+        print("\n[3] Demande d'annulation de la réservation via SmartCampusFacade...")
         self.facade.cancel_reserve(reservation)
 
         print("\n" + "=" * 60)
