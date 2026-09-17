@@ -14,14 +14,22 @@ from orchestrateur.services import (
     Reservation,
     ReservationService,
     ReservationServiceStub,
+
     CampusEvent,
     Notification,
     NotificationService,
     NotificationServiceStub,
+
     DataManagementService,
     DataManagementServiceStub,
     UnifiedData,
     Report,
+
+    AccessControlService,
+    AccessControlService,
+    AccessControlServiceStub,
+    AccessRequest,
+    AccessDecision,
 )
 
 
@@ -39,10 +47,13 @@ class SmartCampusFacade:
         reservation_service: Optional[ReservationService] = None,
         notification_service: Optional[NotificationService] = None,
         data_service: Optional[DataManagementService] = None,
+        access_service : Optional[AccessControlService] = None
     ):
         self.reservation_service = reservation_service or ReservationServiceStub()
         self.notification_service = notification_service or NotificationServiceStub()
         self.data_service = data_service or DataManagementServiceStub()
+        self.access_service = access_service or AccessControlServiceStub()
+
 
     # ==========================================================================
     # MÉTHODES GROUPE 4 — RÉSERVATIONS

@@ -318,3 +318,192 @@ class DataManagementServiceStub(DataManagementService):
 
         self.reports.append(report)
         return report
+
+# ============================================================
+# 4. CONTRATS GROUPE ACCESS CONTROL
+# ============================================================
+
+class AccessRequest:
+    """Requête de contrôle d'accès."""
+
+    def __init__(self, user_id: str, resource: str, action: str):
+        self.user_id = user_id
+        self.resource = resource
+        self.action = action
+
+    def __repr__(self) -> str:
+        return (
+            f"AccessRequest("
+            f"user_id={self.user_id}, "
+            f"resource={self.resource}, "
+            f"action={self.action})"
+        )
+
+
+class AccessDecision:
+    """Résultat d'une vérification d'accès."""
+
+    def __init__(self, allowed: bool, reason: str):
+        self.allowed = allowed
+        self.reason = reason
+
+    def __repr__(self) -> str:
+        return (
+            f"AccessDecision("
+            f"allowed={self.allowed}, "
+            f"reason='{self.reason}')"
+        )
+
+
+class SecurityRegistry:
+    """
+    Registre contenant les informations de sécurité
+    nécessaires au contrôle d'accès.
+    """
+
+    def __init__(self):
+        self.permissions = {
+            "STUDENT_42": {
+                "Amphi Turing": ["read", "reserve"],
+                "Bibliotheque": ["read"],
+            },
+            "ADMIN_01": {
+                "Amphi Turing": ["read", "reserve", "manage"],
+                "Bibliotheque": ["read", "reserve", "manage"],
+            },
+        }
+
+    def has_permission(
+        self,
+        user_id: str,
+        resource: str,
+        action: str
+    ) -> bool:
+        user_permissions = self.permissions.get(user_id, {})
+        allowed_actions = user_permissions.get(resource, [])
+
+        return action in allowed_actions
+
+
+class AccessHandler(ABC):
+    """
+    Handler abstrait du Chain of Responsibility.
+    """
+
+    def __init__(self, next_handler=None):
+        self.next_handler = next_handler
+
+    def set_next(self, handler):
+        self.next_handler = handler
+        return handler
+
+    @abstractmethod
+    def handle(self, request: AccessRequest) -> AccessDecision:
+        pass
+
+
+class AuthenticationHandler(AccessHandler):
+    """Vérifie que l'utilisateur est authentifié."""
+
+    def handle(self, request: AccessRequest) -> AccessDecision:
+
+        if not request.user_id:
+            return AccessDecision(
+                False,
+                "Utilisateur non authentifié"
+            )
+
+        if self.next_handler:
+            return self.next_handler.handle(request)
+
+        return AccessDecision(True, "Utilisateur authentifié")
+
+
+class PermissionHandler(AccessHandler):
+    """Vérifie les permissions de l'utilisateur."""
+
+    def __init__(self, security_registry: SecurityRegistry, next_handler=None):
+        super().__init__(next_handler)
+        self.security_registry = security_registry
+
+    def handle(self, request: AccessRequest) -> AccessDecision:
+
+        if not self.security_registry.has_permission(
+            request.user_id,
+            request.resource,
+            request.action
+        ):
+            return AccessDecision(
+                False,
+                "Permission refusée"
+            )
+
+        if self.next_handler:
+            return self.next_handler.handle(request)
+
+        return AccessDecision(True, "Permission accordée")
+
+
+class AccessControlService(ABC):
+    """
+    Interface du service de contrôle d'accès.
+
+    Conforme au modèle UML :
+    - chain : AccessHandler
+    - securityRegistry : SecurityRegistry
+    - checkAccess(request) : AccessDecision
+    - buildChain() : AccessHandler
+    """
+
+    @abstractmethod
+    def check_access(
+        self,
+        request: AccessRequest
+    ) -> AccessDecision:
+        pass
+
+    @abstractmethod
+    def build_chain(self) -> AccessHandler:
+        pass
+
+
+class AccessControlServiceStub(AccessControlService):
+    """Implémentation stub du service de contrôle d'accès."""
+
+    def __init__(self):
+        self.security_registry = SecurityRegistry()
+        self.chain = self.build_chain()
+
+    def build_chain(self) -> AccessHandler:
+        """
+        Construit la chaîne de contrôle d'accès.
+
+        AuthenticationHandler
+                ↓
+        PermissionHandler
+        """
+
+        authentication_handler = AuthenticationHandler()
+
+        permission_handler = PermissionHandler(
+            self.security_registry
+        )
+
+        authentication_handler.set_next(
+            permission_handler
+        )
+
+        return authentication_handler
+
+    def check_access(
+        self,
+        request: AccessRequest
+    ) -> AccessDecision:
+        """Soumet la requête à la chaîne de contrôle."""
+
+        print(
+            f"[AccessControlService] "
+            f"Vérification de l'accès : {request}"
+        )
+
+        return self.chain.handle(request)
