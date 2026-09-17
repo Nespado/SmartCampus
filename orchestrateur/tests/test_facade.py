@@ -1,6 +1,10 @@
 """
 Tests unitaires pour la façade SmartCampusFacade (Groupe 6).
-Valide la délégation vers le Groupe 4 (Réservations), le Groupe 1 (Notifications) et le Groupe 5 (Data Management).
+Valide la délégation vers :
+- Le Groupe 4 (Réservations)
+- Le Groupe 1 (Notifications)
+- Le Groupe 5 (Data Management)
+- Le Groupe 3 (Contrôle d'accès & Sécurité)
 """
 import unittest
 from unittest.mock import MagicMock
@@ -16,6 +20,9 @@ from orchestrateur import (
     DataManagementService,
     UnifiedData,
     Report,
+    AccessControlService,
+    AccessRequest,
+    AccessDecision,
 )
 
 
@@ -26,11 +33,13 @@ class TestSmartCampusFacade(unittest.TestCase):
         self.mock_reservation_service = MagicMock(spec=ReservationService)
         self.mock_notification_service = MagicMock(spec=NotificationService)
         self.mock_data_service = MagicMock(spec=DataManagementService)
+        self.mock_access_service = MagicMock(spec=AccessControlService)
 
         self.facade = SmartCampusFacade(
             reservation_service=self.mock_reservation_service,
             notification_service=self.mock_notification_service,
             data_service=self.mock_data_service,
+            access_service=self.mock_access_service,
         )
 
     # --------------------------------------------------------------------------
@@ -116,6 +125,20 @@ class TestSmartCampusFacade(unittest.TestCase):
 
         self.assertEqual(result, mock_report)
         self.mock_data_service.generate_report.assert_called_once()
+
+    # --------------------------------------------------------------------------
+    # TESTS DÉLÉGATION GROUPE 3 — CONTRÔLE D'ACCÈS
+    # --------------------------------------------------------------------------
+
+    def test_check_access_delegation(self):
+        mock_request = MagicMock(spec=AccessRequest)
+        mock_decision = MagicMock(spec=AccessDecision)
+        self.mock_access_service.check_access.return_value = mock_decision
+
+        result = self.facade.check_access(mock_request)
+
+        self.assertEqual(result, mock_decision)
+        self.mock_access_service.check_access.assert_called_once_with(mock_request)
 
 
 if __name__ == "__main__":

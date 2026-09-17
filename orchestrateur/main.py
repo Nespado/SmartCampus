@@ -1,7 +1,11 @@
 """
 Client (GROUPE 6 — ORCHESTRATEUR)
 Point d'entrée unique représentant le Client (Admin / Étudiant) interagissant avec la Façade SmartCampusFacade.
-Démontre l'utilisation des services de Réservation (Groupe 4), de Notification (Groupe 1) et de Gestion des données (Groupe 5).
+Démontre l'utilisation des services :
+- Réservation (Groupe 4)
+- Notification (Groupe 1)
+- Gestion des données (Groupe 5)
+- Contrôle d'accès & sécurité (Groupe 3)
 """
 from datetime import datetime, timedelta
 from orchestrateur import (
@@ -9,6 +13,7 @@ from orchestrateur import (
     Incendie,
     CoursAnnule,
     BaseNotification,
+    AccessRequest,
 )
 
 
@@ -19,9 +24,9 @@ class Client:
         self.facade = facade
 
     def run_demo(self):
-        print("=" * 70)
-        print("  SMARTCAMPUS — CLIENT & FAÇADE (GROUPES 4 RÉSERVATION, 1 NOTIF & 5 DATA)")
-        print("=" * 70)
+        print("=" * 75)
+        print("  SMARTCAMPUS — CLIENT & FAÇADE (GROUPES 4 RÉSERV., 1 NOTIF, 5 DATA, 3 ACCÈS)")
+        print("=" * 75)
 
         # ----------------------------------------------------------------------
         # PARTIE 1 : RÉSERVATIONS (GROUPE 4)
@@ -94,9 +99,26 @@ class Client:
         report = self.facade.generate_report()
         print(f"      Rapport généré : {report}")
 
-        print("\n" + "=" * 70)
+        # ----------------------------------------------------------------------
+        # PARTIE 4 : CONTRÔLE D'ACCÈS & SÉCURITÉ (GROUPE 3)
+        # ----------------------------------------------------------------------
+        print("\n--- [PARTIE 4 : CONTRÔLE D'ACCÈS & SÉCURITÉ (Groupe 3)] ---")
+
+        # 1. Demande d'accès autorisée
+        print("\n[4.1] Vérification d'accès autorisée (STUDENT_42 réserve Amphi Turing)...")
+        req_allowed = AccessRequest(user_id="STUDENT_42", resource="Amphi Turing", action="reserve")
+        decision_allowed = self.facade.check_access(req_allowed)
+        print(f"      Décision : {decision_allowed}")
+
+        # 2. Demande d'accès refusée (permission insuffisante)
+        print("\n[4.2] Vérification d'accès refusée (STUDENT_42 manage Amphi Turing)...")
+        req_denied = AccessRequest(user_id="STUDENT_42", resource="Amphi Turing", action="manage")
+        decision_denied = self.facade.check_access(req_denied)
+        print(f"      Décision : {decision_denied}")
+
+        print("\n" + "=" * 75)
         print("  DÉMONSTRATION DU CLIENT ET DE LA FAÇADE RÉUSSIE")
-        print("=" * 70)
+        print("=" * 75)
 
 
 def main():

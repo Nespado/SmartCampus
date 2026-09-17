@@ -4,6 +4,7 @@ Façade orchestrateur unifiée intégrant :
 - Le Groupe 4 : Réservation (ReservationService)
 - Le Groupe 1 : Notifications (NotificationService)
 - Le Groupe 5 : Gestion des données (DataManagementService)
+- Le Groupe 3 : Contrôle d'accès & sécurité (AccessControlService)
 
 Conforme aux conventions de nommage :
 - Classes en PascalCase
@@ -14,18 +15,14 @@ from orchestrateur.services import (
     Reservation,
     ReservationService,
     ReservationServiceStub,
-
     CampusEvent,
     Notification,
     NotificationService,
     NotificationServiceStub,
-
     DataManagementService,
     DataManagementServiceStub,
     UnifiedData,
     Report,
-
-    AccessControlService,
     AccessControlService,
     AccessControlServiceStub,
     AccessRequest,
@@ -40,6 +37,7 @@ class SmartCampusFacade:
     - Groupe 4 (Réservations)
     - Groupe 1 (Notifications)
     - Groupe 5 (Gestion des données)
+    - Groupe 3 (Contrôle d'accès)
     """
 
     def __init__(
@@ -47,13 +45,12 @@ class SmartCampusFacade:
         reservation_service: Optional[ReservationService] = None,
         notification_service: Optional[NotificationService] = None,
         data_service: Optional[DataManagementService] = None,
-        access_service : Optional[AccessControlService] = None
+        access_service: Optional[AccessControlService] = None,
     ):
         self.reservation_service = reservation_service or ReservationServiceStub()
         self.notification_service = notification_service or NotificationServiceStub()
         self.data_service = data_service or DataManagementServiceStub()
         self.access_service = access_service or AccessControlServiceStub()
-
 
     # ==========================================================================
     # MÉTHODES GROUPE 4 — RÉSERVATIONS
@@ -106,3 +103,11 @@ class SmartCampusFacade:
     def generate_report(self) -> Report:
         """Délègue la génération du rapport au DataManagementService."""
         return self.data_service.generate_report()
+
+    # ==========================================================================
+    # MÉTHODES GROUPE 3 — CONTRÔLE D'ACCÈS
+    # ==========================================================================
+
+    def check_access(self, request: AccessRequest) -> AccessDecision:
+        """Délègue la vérification des droits d'accès à l'AccessControlService."""
+        return self.access_service.check_access(request)

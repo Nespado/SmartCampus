@@ -15,6 +15,13 @@ from orchestrateur.services import (
     LegacyFile,
     Report,
     DataManagementService,
+    AccessRequest,
+    AccessDecision,
+    SecurityRegistry,
+    AccessHandler,
+    AuthenticationHandler,
+    PermissionHandler,
+    AccessControlService,
 )
 
 __all__ = [
@@ -31,4 +38,11 @@ __all__ = [
     "LegacyFile",
     "Report",
     "DataManagementService",
+    "AccessRequest",
+    "AccessDecision",
+    "SecurityRegistry",
+    "AccessHandler",
+    "AuthenticationHandler",
+    "PermissionHandler",
+    "AccessControlService",
 ]
