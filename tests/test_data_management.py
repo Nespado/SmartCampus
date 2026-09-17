@@ -1,8 +1,11 @@
 from contextlib import redirect_stdout
 from datetime import date
 from inspect import signature
-from io import StringIO
+from io import BytesIO, StringIO
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 from typing import get_type_hints
 
 from data_management.data_management_service import DataManagementService
@@ -11,7 +14,12 @@ from data_management.reports.pdf_report_factory import PDFReportFactory
 from data_management.reports.report import Report
 from data_management.reports.report_factory import ReportFactory
 from data_management.systeme import Systeme
-from data_management.unified_data import UnifiedData
+from data_management.unified_data import UnifiedData as LegacyUnifiedData
+from data_management.fichiers.api_rest_adapter import ApiRestThirdPartyAdapter
+from data_management.fichiers.csv_adapter import CSVAdapter
+from data_management.fichiers.legacy_file import LegacyFile
+from data_management.fichiers.unified_data import UnifiedData
+from data_management.fichiers.xml_apogee_adapter import XmlApogeeAdapter
 
 
 class SimulatedAdapter:
@@ -129,6 +137,64 @@ class DataManagementTests(unittest.TestCase):
         second = service.generate_report()
         self.assertIsNot(first, second)
         self.assertEqual(service.rapports, [first, second])
+
+    def test_old_import_uses_the_files_class(self):
+        self.assertIs(LegacyUnifiedData, UnifiedData)
+
+    def assert_adapter_reports(self, adapter, expected_data):
+        for factory, format_name in ((PDFReportFactory, "PDF"), (ExcelReportFactory, "Excel")):
+            with self.subTest(adapter=type(adapter).__name__, format=format_name):
+                service = DataManagementService(adapter, factory, "Bilan des salles")
+                data = service.import_data()
+                self.assertIsInstance(data, UnifiedData)
+                self.assertEqual(data.data, expected_data)
+                self.assertIs(service.retrieve_data(), data)
+                report = service.generate_report()
+                self.assertIs(report.donnees, data)
+                self.assertEqual(report.body, str(expected_data))
+                self.assertIn(format_name, report.header)
+                self.assertIn("Bilan des salles", report.header)
+                self.assertEqual(service.rapports, [report])
+
+    def test_csv_adapter_to_reports(self):
+        with TemporaryDirectory(prefix="smartcampus-test-") as directory:
+            path = Path(directory) / "salles.csv"
+            path.write_text("salle,reservations\nA101,3\n", encoding="utf-8")
+            adapter = CSVAdapter(LegacyFile("salles", str(path), "csv"))
+            self.assert_adapter_reports(adapter, {
+                "source": "CSV",
+                "nom": "salles",
+                "donnees": [{"salle": "A101", "reservations": "3"}],
+            })
+
+    def test_xml_adapter_to_reports(self):
+        with TemporaryDirectory(prefix="smartcampus-test-") as directory:
+            path = Path(directory) / "salles.xml"
+            path.write_text(
+                "<salles><salle><nom>A101</nom><reservations>3</reservations></salle></salles>",
+                encoding="utf-8",
+            )
+            adapter = XmlApogeeAdapter(LegacyFile("salles", str(path), "xml"))
+            self.assert_adapter_reports(adapter, {
+                "source": "XML APOGEE",
+                "nom": "salles",
+                "donnees": [{"nom": "A101", "reservations": "3"}],
+            })
+
+    def test_api_adapter_to_reports(self):
+        url = "https://example.invalid/salles"
+        payload = b'[{"salle": "A101", "reservations": 3}]'
+        with patch(
+            "data_management.fichiers.api_rest_adapter.urlopen",
+            side_effect=lambda requested_url: BytesIO(payload),
+        ) as request:
+            self.assert_adapter_reports(ApiRestThirdPartyAdapter(url), {
+                "source": "API REST",
+                "url": url,
+                "donnees": [{"salle": "A101", "reservations": 3}],
+            })
+            self.assertEqual(request.call_count, 2)
+            request.assert_called_with(url)
 
 
 if __name__ == "__main__":

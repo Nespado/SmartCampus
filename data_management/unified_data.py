@@ -1,8 +1,5 @@
-from dataclasses import dataclass
+"""Ancien chemin d'import conservé pour la classe de la partie fichiers."""
 
+from data_management.fichiers.unified_data import UnifiedData
 
-@dataclass
-class UnifiedData:
-    """Conteneur minimal partagé avec les futurs adapters de fichiers."""
-
-    donnees: object
+__all__ = ["UnifiedData"]

@@ -10,6 +10,6 @@ class PDFReportFactory(ReportFactory):
         return header
 
     def create_body(self) -> str:
-        body = str(self.report.donnees.donnees)
+        body = str(self.report.donnees.data)
         print("[PDFReportFactory] Corps construit à partir des données du rapport.")
         return body

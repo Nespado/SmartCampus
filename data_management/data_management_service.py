@@ -1,9 +1,10 @@
 from typing import Protocol
 
+from data_management.fichiers.unified_data import UnifiedData
+
 from .reports.pdf_report_factory import PDFReportFactory
 from .reports.report import Report
 from .reports.report_factory import ReportFactory
-from .unified_data import UnifiedData
 
 
 class AdapterProtocol(Protocol):

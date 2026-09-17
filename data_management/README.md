@@ -16,24 +16,26 @@ conservent leurs valeurs de retour et propagent les exceptions.
 
 ## Connexion avec la partie fichiers
 
-Aucune classe `Fichiers` ni aucun adapter concret n'est implémenté ici.
-Le service attend un objet possédant `adapt() -> UnifiedData`.
-`AdapterProtocol` décrit uniquement ce contrat.
+Le service utilise les adapters du package `data_management.fichiers` et attend un objet
+possédant `adapt() -> UnifiedData`. `AdapterProtocol` décrit ce contrat.
 
-Le PDF ne précise pas la structure interne de `UnifiedData` : le conteneur
-minimal `UnifiedData(donnees=...)` est donc une proposition à harmoniser avec
-l'autre partie du groupe. La relation `Systeme` / `Fichiers` du diagramme et
-les échanges avec les autres groupes restent à vérifier avec leur code.
+La classe commune est `data_management.fichiers.unified_data.UnifiedData`, construite avec
+`UnifiedData(data=...)`. Le service conserve l'objet renvoyé par l'adapter ;
+les factories lisent son attribut `.data` via `rapport.donnees.data`.
+Le module `data_management.unified_data` réexporte cette même classe pour
+conserver l'ancien chemin d'import, sans définir une seconde classe.
 
-Une fois l'adapter réel disponible :
+Exemple avec un fichier CSV existant (adapter le chemin à votre fichier) :
 
 ```python
 from data_management.data_management_service import DataManagementService
 from data_management.reports.excel_report_factory import ExcelReportFactory
+from data_management.fichiers.csv_adapter import CSVAdapter
+from data_management.fichiers.legacy_file import LegacyFile
 
-# adapter_reel est créé par la partie fichiers et renvoie notre UnifiedData.
+fichier = LegacyFile(name="salles", path="salles.csv", type="csv")
 service = DataManagementService(
-    file_adapter=adapter_reel,
+    file_adapter=CSVAdapter(fichier),
     report_factory=ExcelReportFactory,
     report_title="Bilan SmartCampus",
 )
@@ -56,6 +58,9 @@ Depuis la racine du projet, avec Python 3.10 ou supérieur :
 python -m unittest discover -s tests -v
 ```
 
-Les tests simulent `adapt()` en mémoire. Ils vérifient les deux factories,
-les signatures du PDF, les données conservées dans le rapport, l'historique
-et les erreurs. Ils ne valident pas l'intégration avec les adapters réels.
+Les tests vérifient les deux factories, les signatures du PDF, les données
+conservées dans le rapport, l'historique et les erreurs. Les tests d'intégration
+utilisent les vrais adapters CSV et XML avec des fichiers temporaires, ainsi
+que le vrai adapter API REST avec une réponse HTTP simulée. Chaque adapter
+est testé jusqu'à la construction des rapports PDF et Excel ; aucun service
+HTTP réel n'est contacté. L'assemblage avec les autres groupes reste à valider.
