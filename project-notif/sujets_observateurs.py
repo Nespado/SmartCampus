@@ -1,45 +1,60 @@
 from abc import ABC, abstractmethod
-from typing import List
-from evenements import Evenement
+from typing import TYPE_CHECKING
 
-class Sujet(ABC):
-    """Interface pour le pattern Observer"""
-    @abstractmethod
-    def add_observer(self, observer: 'Observateur'):
-        pass
+if TYPE_CHECKING:
+    from evenements import CampusEvent
 
-    def ajouter_observateur(self, observateur: 'Observateur'):
-        self.add_observer(observateur)
+
+class EventObserver(ABC):
+    """Interface pour les observateurs d'événements (Groupe 1)."""
 
     @abstractmethod
-    def remove_observer(self, observer: 'Observateur'):
+    def update(self, event: 'CampusEvent') -> None:
         pass
 
-    def retirer_observateur(self, observateur: 'Observateur'):
-        self.remove_observer(observateur)
-
-    @abstractmethod
-    def notify_observers(self, event: Evenement):
-        pass
-
-    def notifier_observateurs(self, evenement: Evenement):
-        self.notify_observers(evenement)
-
-
-class Observateur(ABC):
-    """Interface pour les observateurs"""
-    @abstractmethod
-    def update(self, event: Evenement):
-        pass
-
-    def mettre_a_jour(self, e: Evenement):
+    def mettre_a_jour(self, e: 'CampusEvent') -> None:
+        """Alias français pour compatibilité."""
         self.update(e)
 
 
-EventObserver = Observateur
+# Alias français pour compatibilité
+Observateur = EventObserver
+
+
+class EventPublisher(ABC):
+    """Interface / classe abstraite pour le pattern Observer (Groupe 1)."""
+
+    @abstractmethod
+    def add_observer(self, observer: EventObserver) -> None:
+        pass
+
+    def ajouter_observateur(self, observateur: EventObserver) -> None:
+        """Alias français pour compatibilité."""
+        self.add_observer(observateur)
+
+    @abstractmethod
+    def remove_observer(self, observer: EventObserver) -> None:
+        pass
+
+    def retirer_observateur(self, observateur: EventObserver) -> None:
+        """Alias français pour compatibilité."""
+        self.remove_observer(observateur)
+
+    @abstractmethod
+    def notify_observers(self, event: 'CampusEvent') -> None:
+        pass
+
+    def notifier_observateurs(self, evenement: 'CampusEvent') -> None:
+        """Alias français pour compatibilité."""
+        self.notify_observers(evenement)
+
+
+# Alias français pour compatibilité
+Sujet = EventPublisher
 
 
 class Admin:
     """Import Groupe 6 - Représente un administrateur"""
-    def gerer_sujet(self, sujet: Sujet):
-        pass    
+
+    def gerer_sujet(self, sujet: EventPublisher):
+        pass

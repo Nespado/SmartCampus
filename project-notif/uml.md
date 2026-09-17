@@ -5,26 +5,28 @@ classDiagram
     class ModuleCampus {
         <<abstract>>
         +emettreEvenement()
+        +add_observer(observer : EventObserver)
+        +remove_observer(observer : EventObserver)
+        +notify_observers(event : CampusEvent)
     }
 
     class ModuleAcces {
-        +detecterIncendie()
+        +detecter_incendie()
     }
 
     class ModuleEcoGestion {
-        +detecterAlerteConso()
+        +detecter_alerte_conso()
     }
 
     class ModuleReservation {
-        +annulerCours()
+        +annuler_cours()
     }
 
     ModuleCampus <|-- ModuleAcces
     ModuleCampus <|-- ModuleEcoGestion
     ModuleCampus <|-- ModuleReservation
 
-
-    class Evenement {
+    class CampusEvent {
         <<abstract>>
         +date : Date
         +description : String
@@ -35,90 +37,93 @@ classDiagram
     }
 
     class CoursAnnule {
-        +nomCours : String
+        +nom_cours : String
         +raison : String
     }
 
     class AlerteConso {
-        +niveau : StringSujet
+        +niveau : String
         +consommation : double
     }
 
     class Salle {
         +nom : String
-        +interagir(e : Evenement)
+        +interagir(event : CampusEvent)
     }
 
-    Salle ..> Evenement
-    Evenement <|-- Incendie
-    Evenement <|-- CoursAnnule
-    Evenement <|-- AlerteConso
+    Salle ..> CampusEvent
+    CampusEvent <|-- Incendie
+    CampusEvent <|-- CoursAnnule
+    CampusEvent <|-- AlerteConso
 
-    ModuleCampus "1" --> "0..*" Evenement : produit
+    ModuleCampus "1" --> "0..*" CampusEvent : produit
 
-
-    class Sujet {
+    class EventPublisher {
         <<interface>>
-        +add_observer(observer : Observateur)
-        +remove_observer(observer : Observateur)
-        +notify_observers(event : Evenement)
+        +add_observer(observer : EventObserver)
+        +remove_observer(observer : EventObserver)
+        +notify_observers(event : CampusEvent)
     }
 
-    class Observateur {
+    class EventObserver {
         <<interface>>
-        +update(event : Evenement)
+        +update(event : CampusEvent)
     }
 
-    class ServiceNotification {
-        +update(event : Evenement)
-        +handle_event(event : Evenement)
+    class NotificationService {
+        +update(event : CampusEvent)
+        +handle_event(event : CampusEvent)
         +send(notification : Notification)
     }
 
     class Admin {
-        +gerer_sujet(sujet : Sujet)
+        +gerer_sujet(sujet : EventPublisher)
     }
 
-    Admin --> Sujet 
-    Sujet <|.. ModuleCampus
-    Observateur <|.. ServiceNotification
+    Admin --> EventPublisher 
+    EventPublisher <|.. ModuleCampus
+    EventObserver <|.. NotificationService
 
-    ModuleCampus "1" o-- "0..*" Observateur : notifie
+    ModuleCampus "1" o-- "0..*" EventObserver : notifie
 
-
-    class StrategieEnvoi {
+    class DeliveryStrategy {
         <<interface>>
         +send(notification : Notification)
     }
 
-    class EnvoiSMS {
+    class SmsDeliveryStrategy {
         +send(notification : Notification)
     }
 
-    class EnvoiEmail {
+    class EmailDeliveryStrategy {
         +send(notification : Notification)
     }
 
-    class EnvoiPush {
+    class PushDeliveryStrategy {
         +send(notification : Notification)
     }
 
-    class EnvoiSlack {
+    class SlackDeliveryStrategy {
         +send(notification : Notification)
     }
 
-    StrategieEnvoi <|.. EnvoiSMS
-    StrategieEnvoi <|.. EnvoiEmail
-    StrategieEnvoi <|.. EnvoiPush
-    StrategieEnvoi <|.. EnvoiSlack
+    DeliveryStrategy <|.. SmsDeliveryStrategy
+    DeliveryStrategy <|.. EmailDeliveryStrategy
+    DeliveryStrategy <|.. PushDeliveryStrategy
+    DeliveryStrategy <|.. SlackDeliveryStrategy
 
-    ServiceNotification "1" --> "1..*" StrategieEnvoi : utilise
-
+    NotificationService "1" --> "1..*" DeliveryStrategy : utilise
 
     class Notification {
         <<abstract>>
         +destinataire : String
+        +recipient : String
         +contenu : String
+        +content : String
+        +generate_content() : String
+    }
+
+    class BaseNotification {
         +generate_content() : String
     }
 
@@ -138,19 +143,15 @@ classDiagram
         +generate_content() : String
     }
 
+    Notification <|-- BaseNotification
     Notification <|-- SMS
     Notification <|-- Email
     Notification <|-- Push
     Notification <|-- Slack
 
-
     class NotificationDecorator {
         <<abstract>>
         #notification : Notification
-        +generate_content() : String
-    }
-
-    class BaseNotification {
         +generate_content() : String
     }
 
@@ -172,13 +173,12 @@ classDiagram
     NotificationDecorator <|-- WithSignature
     NotificationDecorator <|-- WithUrgentHeader
     NotificationDecorator <|-- EncryptedNotification
-    Notification <|-- BaseNotification
 
     NotificationDecorator "1" o-- "1" Notification : enveloppe
 
-
     class NotificationFactory {
         <<factory>>
-        +create(event : Evenement, recipient : String) : Notification
+        +create(event : CampusEvent, recipient : String) : Notification
     }
     NotificationFactory "1" --> "1" Notification : crée
+```

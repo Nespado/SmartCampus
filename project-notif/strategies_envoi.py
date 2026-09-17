@@ -5,39 +5,61 @@ if TYPE_CHECKING:
     from notifications import Notification
 
 
-class StrategieEnvoi(ABC):
-    """Interface de stratégie d'envoi"""
+class DeliveryStrategy(ABC):
+    """Interface de stratégie d'envoi (Groupe 1)."""
+
     @abstractmethod
-    def send(self, notification: 'Notification'):
+    def send(self, notification: 'Notification') -> None:
         pass
 
-    def envoyer(self, notification: 'Notification'):
+    def envoyer(self, notification: 'Notification') -> None:
+        """Alias français pour compatibilité."""
         self.send(notification)
 
 
-class EnvoiSMS(StrategieEnvoi):
-    def send(self, notification: 'Notification'):
+# Alias français pour compatibilité
+StrategieEnvoi = DeliveryStrategy
+
+
+class SmsDeliveryStrategy(DeliveryStrategy):
+
+    def send(self, notification: 'Notification') -> None:
         print(f"[STRATÉGIE SMS] Envoi en cours à {notification.destinataire}...")
 
 
-class EnvoiEmail(StrategieEnvoi):
-    def send(self, notification: 'Notification'):
+class EmailDeliveryStrategy(DeliveryStrategy):
+
+    def send(self, notification: 'Notification') -> None:
         print(f"[STRATÉGIE EMAIL] Envoi en cours à {notification.destinataire}...")
 
 
-class EnvoiPush(StrategieEnvoi):
-    def send(self, notification: 'Notification'):
+class PushDeliveryStrategy(DeliveryStrategy):
+
+    def send(self, notification: 'Notification') -> None:
         print(f"[STRATÉGIE PUSH] Envoi en cours à {notification.destinataire}...")
 
 
-class EnvoiSlack(StrategieEnvoi):
-    def send(self, notification: 'Notification'):
+class SlackDeliveryStrategy(DeliveryStrategy):
+
+    def send(self, notification: 'Notification') -> None:
         print(f"[STRATÉGIE SLACK] Envoi en cours à {notification.destinataire}...")
 
 
-# Noms anglais du contrat Groupe 1.
-DeliveryStrategy = StrategieEnvoi
-SmsDeliveryStrategy = EnvoiSMS
-EmailDeliveryStrategy = EnvoiEmail
-PushDeliveryStrategy = EnvoiPush
-SlackDeliveryStrategy = EnvoiSlack
+# Alias français conservés
+EnvoiSMS = SmsDeliveryStrategy
+EnvoiEmail = EmailDeliveryStrategy
+EnvoiPush = PushDeliveryStrategy
+EnvoiSlack = SlackDeliveryStrategy
+
+__all__ = [
+    "DeliveryStrategy",
+    "StrategieEnvoi",
+    "SmsDeliveryStrategy",
+    "EmailDeliveryStrategy",
+    "PushDeliveryStrategy",
+    "SlackDeliveryStrategy",
+    "EnvoiSMS",
+    "EnvoiEmail",
+    "EnvoiPush",
+    "EnvoiSlack",
+]

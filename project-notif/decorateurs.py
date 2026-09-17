@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
 
-from notifications import Notification
+from notifications import Notification, BaseNotification
+
 
 class NotificationDecorator(Notification, ABC):
-    """Décorateur abstrait qui enveloppe une notification."""
+    """Décorateur abstrait qui enveloppe une notification (Groupe 1)."""
+
     def __init__(self, notification: Notification):
         super().__init__(
-            notification.destinataire,
-            notification.contenu
+            destinataire=notification.destinataire,
+            contenu=notification.contenu,
         )
         self.notification = notification
 
@@ -16,17 +18,10 @@ class NotificationDecorator(Notification, ABC):
         pass
 
 
-class BaseNotification(Notification):
-    def generate_content(self) -> str:
-        return self.contenu
-
-
 class WithSignature(NotificationDecorator):
-    def __init__(
-        self,
-        notification: Notification,
-        signature: str
-    ):
+    """Ajoute une signature à la notification."""
+
+    def __init__(self, notification: Notification, signature: str):
         super().__init__(notification)
         self.signature = signature
 
@@ -38,6 +33,8 @@ class WithSignature(NotificationDecorator):
 
 
 class WithUrgentHeader(NotificationDecorator):
+    """Ajoute un en-tête URGENT à la notification."""
+
     def generate_content(self) -> str:
         return (
             f"URGENT\n"
@@ -46,13 +43,31 @@ class WithUrgentHeader(NotificationDecorator):
 
 
 class EncryptedNotification(NotificationDecorator):
-    def generate_content(self) -> str:
-        return self.encrypt(self.notification.generate_content())
+    """Chiffre le contenu de la notification (Groupe 1)."""
 
-    def encrypt(self, contenu: str) -> str:
+    def encrypt(self, contenu: str | None = None) -> str:
+        """Chiffre le contenu.
+        
+        Conforme au contrat Groupe 1 : peut être appelé sans argument
+        pour chiffrer le contenu de la notification enveloppée.
+        Accepte aussi un argument optionnel pour compatibilité.
+        """
+        if contenu is None:
+            contenu = self.notification.generate_content()
         return f"[CHIFFRÉ] {contenu}"
 
-    def chiffrer(self, contenu: str) -> str:
-        """Alias français conservé pour l'ancien contrat."""
+    def generate_content(self) -> str:
+        return self.encrypt()
+
+    def chiffrer(self, contenu: str | None = None) -> str:
+        """Alias français pour compatibilité."""
         return self.encrypt(contenu)
 
+
+__all__ = [
+    "NotificationDecorator",
+    "BaseNotification",
+    "WithSignature",
+    "WithUrgentHeader",
+    "EncryptedNotification",
+]
