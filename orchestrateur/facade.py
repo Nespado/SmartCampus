@@ -1,15 +1,23 @@
 """
 SmartCampusFacade (GROUPE 6 — ORCHESTRATEUR)
-Façade orchestrateur conforme aux conventions de nommage :
+Façade orchestrateur unifiée intégrant :
+- Le Groupe 4 : Réservation (ReservationService)
+- Le Groupe 1 : Notifications (NotificationService)
+- Le Groupe 5 : Gestion des données (DataManagementService)
+
+Conforme aux conventions de nommage :
 - Classes en PascalCase
 - Méthodes et arguments en snake_case
 """
 from typing import Any, Optional
-
 from orchestrateur.services import (
     Reservation,
     ReservationService,
     ReservationServiceStub,
+    CampusEvent,
+    Notification,
+    NotificationService,
+    NotificationServiceStub,
     DataManagementService,
     DataManagementServiceStub,
     UnifiedData,
@@ -20,20 +28,26 @@ from orchestrateur.services import (
 class SmartCampusFacade:
     """
     Façade unique du système SmartCampus (Groupe 6).
-    Point d'entrée orchestrant les requêtes de réservation vers le Groupe 4 (ReservationService).
+    Point d'entrée orchestrant les requêtes vers les microservices :
+    - Groupe 4 (Réservations)
+    - Groupe 1 (Notifications)
+    - Groupe 5 (Gestion des données)
     """
 
     def __init__(
         self,
         reservation_service: Optional[ReservationService] = None,
+        notification_service: Optional[NotificationService] = None,
         data_service: Optional[DataManagementService] = None,
     ):
         self.reservation_service = reservation_service or ReservationServiceStub()
-        self.data_service = (
-                data_service or DataManagementServiceStub()
-        )
+        self.notification_service = notification_service or NotificationServiceStub()
+        self.data_service = data_service or DataManagementServiceStub()
 
-    # --- GROUPE 4 : RESERVATION ---
+    # ==========================================================================
+    # MÉTHODES GROUPE 4 — RÉSERVATIONS
+    # ==========================================================================
+
     def reserve_room(self, requester_id: str, room: Any, start_time: Any, end_time: Any) -> Reservation:
         """Réserve une salle en déléguant au ReservationService du Groupe 4."""
         return self.reservation_service.reserve(requester_id, room, start_time, end_time)
@@ -50,7 +64,26 @@ class SmartCampusFacade:
         """Délègue le rétablissement de la dernière action (Redo) au ReservationService du Groupe 4."""
         self.reservation_service.redo_last_action()
 
-    # --- DATA MANAGEMENT ---
+    # ==========================================================================
+    # MÉTHODES GROUPE 1 — NOTIFICATIONS
+    # ==========================================================================
+
+    def update_notification(self, event: CampusEvent) -> None:
+        """Met à jour les notifications lors d'un événement campus (Observer update)."""
+        self.notification_service.update(event)
+
+    def handle_event_notification(self, event: CampusEvent) -> None:
+        """Déclenche le traitement direct d'un événement par le NotificationService."""
+        self.notification_service.handle_event(event)
+
+    def send_notification(self, notification: Notification) -> None:
+        """Envoie directement une notification via les canaux configurés."""
+        self.notification_service.send(notification)
+
+    # ==========================================================================
+    # MÉTHODES GROUPE 5 — DATA MANAGEMENT
+    # ==========================================================================
+
     def import_data(self) -> UnifiedData:
         """Délègue l'importation des données au DataManagementService."""
         return self.data_service.import_data()
