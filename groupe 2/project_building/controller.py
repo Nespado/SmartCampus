@@ -17,5 +17,5 @@ class RegulationController(RegulationService):
             raise TypeError("strategy must implement RegulationAlgorithm")
         self._strategy = strategy
 
-    def calculate_regulation(self, data: RegulationInput) -> float:
-        return self._strategy.calculate(data)
+    def calculate_regulation(self, regulation_input: RegulationInput) -> float:
+        return self._strategy.calculate(regulation_input)

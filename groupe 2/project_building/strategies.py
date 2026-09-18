@@ -16,7 +16,7 @@ class RegulationInput:
 
 class RegulationAlgorithm(ABC):
     @abstractmethod
-    def calculate(self, data: RegulationInput) -> float:
+    def calculate(self, regulation_input: RegulationInput) -> float:
         """Return a normalized regulation command in the range [-1, 1]."""
 
 
@@ -28,8 +28,8 @@ class PIDAlgorithm(RegulationAlgorithm):
         self._integral = 0.0
         self._previous_error = 0.0
 
-    def calculate(self, data: RegulationInput) -> float:
-        error = data.target_temperature - data.current_temperature
+    def calculate(self, regulation_input: RegulationInput) -> float:
+        error = regulation_input.target_temperature - regulation_input.current_temperature
         self._integral += error
         derivative = error - self._previous_error
         self._previous_error = error
@@ -47,8 +47,8 @@ class QuickThresholdAlgorithm(RegulationAlgorithm):
             raise ValueError("threshold must be greater than zero")
         self.threshold = threshold
 
-    def calculate(self, data: RegulationInput) -> float:
-        error = data.target_temperature - data.current_temperature
+    def calculate(self, regulation_input: RegulationInput) -> float:
+        error = regulation_input.target_temperature - regulation_input.current_temperature
         if error > self.threshold:
             return 1.0
         if error < -self.threshold:
@@ -62,7 +62,10 @@ class SolarOptimizedAlgorithm(RegulationAlgorithm):
             raise ValueError("solar_gain cannot be negative")
         self.solar_gain = solar_gain
 
-    def calculate(self, data: RegulationInput) -> float:
-        adjusted_target = data.target_temperature - data.solar_irradiance * self.solar_gain
-        error = adjusted_target - data.current_temperature
+    def calculate(self, regulation_input: RegulationInput) -> float:
+        adjusted_target = (
+            regulation_input.target_temperature
+            - regulation_input.solar_irradiance * self.solar_gain
+        )
+        error = adjusted_target - regulation_input.current_temperature
         return max(-1.0, min(1.0, error))
