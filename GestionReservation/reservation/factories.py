@@ -1,9 +1,12 @@
+from abc import ABC, abstractmethod
+
 from .reservations import EquipmentReservation, RoomReservation
 
 
-class ReservationFactory:
+class ReservationFactory(ABC):
     """Classe de base des fabriques de réservations."""
 
+    @abstractmethod
     def create_reservation(self):
         pass
 

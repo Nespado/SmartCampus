@@ -1,12 +1,16 @@
+from abc import ABC, abstractmethod
+
 from .reservations import RoomReservation
 
 
-class Command:
+class Command(ABC):
     """Classe de base des commandes."""
 
+    @abstractmethod
     def execute(self):
         pass
 
+    @abstractmethod
     def undo(self):
         pass
 
@@ -74,6 +78,8 @@ class CommandManager:
         if success:
             self.history.append(command)
             self.redo_history.clear()
+
+        return success
 
     def undo(self):
         if not self.history:

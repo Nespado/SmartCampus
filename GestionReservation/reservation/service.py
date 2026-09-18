@@ -24,7 +24,11 @@ class ReservationService:
         )
 
         command = ReservationCommand(reservation, self.schedule_service)
-        self.command_manager.execute_command(command)
+        success = self.command_manager.execute_command(command)
+
+        if not success:
+            return None
+
         return reservation
 
     def reserve_equipment(self, requester_id, equipment, start_time, end_time):
@@ -37,7 +41,11 @@ class ReservationService:
         )
 
         command = ReservationCommand(reservation)
-        self.command_manager.execute_command(command)
+        success = self.command_manager.execute_command(command)
+
+        if not success:
+            return None
+
         return reservation
 
     def cancel_reservation(self, reservation):

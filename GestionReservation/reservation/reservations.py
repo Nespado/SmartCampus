@@ -1,9 +1,14 @@
-class Reservation:
+from abc import ABC, abstractmethod
+
+
+class Reservation(ABC):
     """Classe de base des réservations."""
 
+    @abstractmethod
     def reserve(self):
         pass
 
+    @abstractmethod
     def cancel(self):
         pass
 
@@ -58,5 +63,6 @@ class EquipmentReservation(Reservation):
         return True
 
     def cancel(self):
-        self.active = False
-        self.equipment.available = True
+        if self.active:
+            self.active = False
+            self.equipment.available = True
