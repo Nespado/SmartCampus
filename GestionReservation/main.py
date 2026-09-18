@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from GestionReservation.reservation import Equipment, ReservationService
+from GestionReservation import Equipment, ReservationService
 
 
 class FakeRoom:
