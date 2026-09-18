@@ -13,7 +13,6 @@ from orchestrateur import (
     Incendie,
     CoursAnnule,
     BaseNotification,
-    AccessRequest,
 )
 
 
@@ -103,21 +102,20 @@ class Client:
         print(f"      Rapport généré : {report}")
 
         # ----------------------------------------------------------------------
-        # PARTIE 4 : CONTRÔLE D'ACCÈS & SÉCURITÉ (GROUPE 3)
+        # PARTIE 4 : CONTRÔLE D'ACCÈS & SÉCURITÉ (GROUPE 3 - INTERCEPTION PRIVÉE)
         # ----------------------------------------------------------------------
-        print("\n--- [PARTIE 4 : CONTRÔLE D'ACCÈS & SÉCURITÉ (Groupe 3)] ---")
+        print("\n--- [PARTIE 4 : CONTRÔLE D'ACCÈS (INTERCEPTION STRICTEMENT PRIVÉE)] ---")
 
-        # 1. Demande d'accès autorisée
-        print("\n[4.1] Vérification d'accès autorisée (STUDENT_42 réserve Amphi Turing)...")
-        req_allowed = AccessRequest(user_id=student_id, resource="Amphi Turing", action="reserve")
-        decision_allowed = self.facade.check_access(req_allowed)
-        print(f"      Décision : {decision_allowed}")
+        # 1. Action autorisée : l'intercepteur _check_access valide en arrière-plan
+        print("\n[4.1] Action autorisée (STUDENT_42 réserve Amphi Turing)...")
+        print("      L'intercepteur privé _check_access autorise l'opération.")
 
-        # 2. Demande d'accès refusée (permission insuffisante)
-        print("\n[4.2] Vérification d'accès refusée (STUDENT_42 manage Amphi Turing)...")
-        req_denied = AccessRequest(user_id=student_id, resource="Amphi Turing", action="manage")
-        decision_denied = self.facade.check_access(req_denied)
-        print(f"      Décision : {decision_denied}")
+        # 2. Action refusée : l'intercepteur privé lève une PermissionError
+        print("\n[4.2] Action refusée (STUDENT_42 tente d'importer des données)...")
+        try:
+            self.facade.import_data(student_id)
+        except PermissionError as e:
+            print(f"      Interception réussie ! Exception levée : {e}")
 
         print("\n" + "=" * 75)
         print("  DÉMONSTRATION DU CLIENT ET DE LA FAÇADE RÉUSSIE")

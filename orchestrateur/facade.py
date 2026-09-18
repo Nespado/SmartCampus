@@ -203,12 +203,8 @@ class SmartCampusFacade:
         return self.data_service.generate_report()
 
     # ==========================================================================
-    # MÉTHODES GROUPE 3 — CONTRÔLE D'ACCÈS
+    # MÉTHODES INTERNES — CONTRÔLE D'ACCÈS
     # ==========================================================================
-
-    def check_access(self, request: AccessRequest) -> AccessDecision:
-        """Délègue la vérification des droits d'accès à l'AccessControlService."""
-        return self.access_service.check_access(request)
 
     def _check_access(
             self,

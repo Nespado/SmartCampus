@@ -130,20 +130,6 @@ class TestSmartCampusFacade(unittest.TestCase):
         self.mock_data_service.generate_report.assert_called_once()
 
     # --------------------------------------------------------------------------
-    # TESTS DÉLÉGATION GROUPE 3 — CONTRÔLE D'ACCÈS
-    # --------------------------------------------------------------------------
-
-    def test_check_access_delegation(self):
-        mock_request = MagicMock(spec=AccessRequest)
-        mock_decision = MagicMock(spec=AccessDecision)
-        self.mock_access_service.check_access.return_value = mock_decision
-
-        result = self.facade.check_access(mock_request)
-
-        self.assertEqual(result, mock_decision)
-        self.mock_access_service.check_access.assert_called_once_with(mock_request)
-
-    # --------------------------------------------------------------------------
     # TESTS INTERCEPTION ET GESTION DES REFUS D'ACCÈS (_check_access)
     # --------------------------------------------------------------------------
 
