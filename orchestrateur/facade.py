@@ -26,7 +26,6 @@ from orchestrateur.services import (
     Report,
 
     AccessControlService,
-    AccessControlService,
     AccessControlServiceStub,
     AccessRequest,
     AccessDecision,
@@ -207,6 +206,10 @@ class SmartCampusFacade:
     # MÉTHODES GROUPE 3 — CONTRÔLE D'ACCÈS
     # ==========================================================================
 
+    def check_access(self, request: AccessRequest) -> AccessDecision:
+        """Délègue la vérification des droits d'accès à l'AccessControlService."""
+        return self.access_service.check_access(request)
+
     def _check_access(
             self,
             user_id: str,
@@ -221,7 +224,7 @@ class SmartCampusFacade:
             action=action
         )
 
-        decision = self.check_access(request)
+        decision = self.access_service.check_access(request)
 
         if not decision.allowed:
             raise PermissionError(

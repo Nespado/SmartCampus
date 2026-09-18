@@ -366,10 +366,15 @@ class SecurityRegistry:
             "STUDENT_42": {
                 "Amphi Turing": ["read", "reserve"],
                 "Bibliotheque": ["read"],
+                "reservation": ["cancel", "undo", "redo"],
+                "notification": ["update", "handle", "send"],
             },
             "ADMIN_01": {
                 "Amphi Turing": ["read", "reserve", "manage"],
                 "Bibliotheque": ["read", "reserve", "manage"],
+                "reservation": ["cancel", "undo", "redo"],
+                "notification": ["update", "handle", "send"],
+                "data": ["import", "retrieve", "generate_report"],
             },
         }
 
