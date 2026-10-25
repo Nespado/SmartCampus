@@ -117,13 +117,34 @@ class Client:
         except PermissionError as e:
             print(f"      Interception réussie ! Exception levée : {e}")
 
+        # ----------------------------------------------------------------------
+        # PARTIE 5 : BÂTIMENT INTELLIGENT & ÉCO-GÉRANCE (GROUPE 2)
+        # ----------------------------------------------------------------------
+        if getattr(self.facade, "building_service", None) is not None:
+            print("\n--- [PARTIE 5 : BÂTIMENT INTELLIGENT & RÉGULATION (Groupe 2)] ---")
+            building_svc = self.facade.building_service
+            classroom = building_svc.create_room("Amphi Turing", "classroom", target_temp=21.0, current_temp=18.5)
+            print(f"[5.1] Salle 'Amphi Turing' créée (État: {type(classroom.state).__name__}, Temp. cible: 21°C, Temp. actuelle: 18.5°C)")
+            building_svc.regulate(classroom)
+            print(f"      Régulation PID calculée -> Chauffage: {classroom.heating_level:.2f} | Éclairage: {classroom.lighting_level:.2f}")
+
         print("\n" + "=" * 75)
         print("  DÉMONSTRATION DU CLIENT ET DE LA FAÇADE RÉUSSIE")
         print("=" * 75)
 
 
 def main():
-    facade = SmartCampusFacade()
+    import sys
+
+    use_stubs = "--stubs" in sys.argv
+
+    if use_stubs:
+        print("\n>>> MODE : STUBS D'ORCHESTRATION <<<\n")
+        facade = SmartCampusFacade()
+    else:
+        print("\n>>> MODE : TOUS LES SERVICES RÉELS CONNECTÉS <<<\n")
+        facade = SmartCampusFacade.create_with_real_services()
+
     client = Client(facade)
     client.run_demo()
 

@@ -46,12 +46,41 @@ class SmartCampusFacade:
         reservation_service: Optional[ReservationService] = None,
         notification_service: Optional[NotificationService] = None,
         data_service: Optional[DataManagementService] = None,
-        access_service : Optional[AccessControlService] = None
+        access_service: Optional[AccessControlService] = None,
+        building_service: Optional[Any] = None,
     ):
         self.reservation_service = reservation_service or ReservationServiceStub()
         self.notification_service = notification_service or NotificationServiceStub()
         self.data_service = data_service or DataManagementServiceStub()
         self.access_service = access_service or AccessControlServiceStub()
+        self.building_service = building_service
+
+    @classmethod
+    def create_with_real_services(cls) -> "SmartCampusFacade":
+        """Instancie la façade connectée à tous les vrais services du campus."""
+        from orchestrateur.adapters import (
+            RealReservationAdapter,
+            RealNotificationAdapter,
+            RealDataManagementAdapter,
+            RealAccessControlAdapter,
+            BuildingRegulationAdapter,
+        )
+
+        reservation_adapter = RealReservationAdapter()
+        notification_adapter = RealNotificationAdapter()
+        data_adapter = RealDataManagementAdapter()
+        access_adapter = RealAccessControlAdapter(
+            schedule_service=getattr(reservation_adapter.real_service, "schedule_service", None)
+        )
+        building_adapter = BuildingRegulationAdapter()
+
+        return cls(
+            reservation_service=reservation_adapter,
+            notification_service=notification_adapter,
+            data_service=data_adapter,
+            access_service=access_adapter,
+            building_service=building_adapter,
+        )
 
     # ==========================================================================
     # MÉTHODES GROUPE 4 — RESERVATION
