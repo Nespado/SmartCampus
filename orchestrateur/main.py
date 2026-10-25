@@ -7,7 +7,15 @@ Démontre l'utilisation des services :
 - Gestion des données (Groupe 5)
 - Contrôle d'accès & sécurité (Groupe 3)
 """
+import os
+import sys
 from datetime import datetime, timedelta
+
+# Permet d'exécuter `python main.py` directement depuis le dossier orchestrateur/ ou depuis la racine
+PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PARENT_DIR not in sys.path:
+    sys.path.insert(0, PARENT_DIR)
+
 from orchestrateur import (
     SmartCampusFacade,
     Incendie,
